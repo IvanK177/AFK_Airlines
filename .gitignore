@@ -1,0 +1,12 @@
+AGENTS.md
+ldock
+.pytest_cache
+.env
+.venv/
+.idea/
+__pycache__/
+*.py[cod]
+db.sqlite3
+.DS_Store
+.coverage
+staticfiles/
