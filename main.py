@@ -1,4 +1,6 @@
 import sys
+from booking import create_order, refund_order
+from flights import free_seats, search_flights
 from orders import filter_orders, print_orders, MOCK_ORDERS
 
 def main():
@@ -13,7 +15,7 @@ def main():
         {"code": "SU1120", "origin": "Москва", "destination": "Сочи", "date": "2026-12-15", "capacity": "3"},
         {"code": "S72504", "origin": "Москва", "destination": "Новосибирск", "date": "2026-12-20", "capacity": "150"}
     ]
-    orders = MOCK_ORDERS
+    orders = [order.copy() for order in MOCK_ORDERS]
 
     while True:
         print("=== СИСТЕМА БРОНИРОВАНИЯ АВИАБИЛЕТОВ ===")
@@ -30,10 +32,33 @@ def main():
             continue
             
         if choice == "1":
-            print("\n[Заглушка] Поиск рейсов (вызов search_flights)...\n")
+            origin = input("Город отправления: ")
+            destination = input("Город назначения: ")
+            date = input("Дата (ГГГГ-ММ-ДД): ")
+            found_flights = search_flights(flights, origin, destination, date)
+            if not found_flights:
+                print("\nРейсы не найдены.\n")
+            else:
+                for flight in found_flights:
+                    print(
+                        f"\n{flight['code']}: {flight['origin']} -> "
+                        f"{flight['destination']}, {flight['date']}, "
+                        f"свободно мест: {free_seats(flight, orders)}\n"
+                    )
             
         elif choice == "2":
-            print("\n[Заглушка] Оформление заказа (вызов create_order)...\n")
+            flight_code = input("Код рейса: ").strip()
+            customer = input("Имя покупателя: ")
+            seats_input = input("Количество мест: ")
+            try:
+                seats = int(seats_input)
+            except ValueError:
+                print("\n[Ошибка] Количество мест должно быть целым числом.\n")
+                continue
+            success, message = create_order(
+                flights, orders, flight_code, customer, seats
+            )
+            print(f"\n{message}\n")
             
         elif choice == "3":
             print("\n--- Настройки фильтрации (Оставьте пустым для пропуска) ---")
@@ -44,7 +69,9 @@ def main():
             print_orders(current_orders)
             
         elif choice == "4":
-            print("\n[Заглушка] Возврат билета (вызов refund_order)...\n")
+            order_id = input("Номер заказа: ").strip()
+            success, message = refund_order(orders, order_id)
+            print(f"\n{message}\n")
             
         elif choice == "5":
             print("\nРабота завершена. До свидания!")
